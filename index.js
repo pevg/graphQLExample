@@ -44,20 +44,8 @@ const usersDB = [
     role: "admin",
     street: "cordoba",
     number: "3546"
-  },
-  {
-    id: "5",
-    email: "nicolas@gmail.com",
-    password: "bca123asdasd",
-    name: "Nicolas Tesla",
-    age: 15,
-    role: "admin",
-    street: "cordoba",
-    number: "3546"
-  },
+  }
 ];
-
-  
 
 const typeDefs = gql`
 
@@ -68,12 +56,15 @@ const typeDefs = gql`
     age:        Int!
     role:       String!
     avatar:     String
+    older:      Boolean
+    address:    Address
   }
 
-"""   type address {
+
+  type Address {
     street:     String!
     number:     String!
-  } """
+  }
 
   type Query {
     getUsers:                [User]!
@@ -93,36 +84,35 @@ const typeDefs = gql`
 `
 
 const resolvers = {
+
+  User: {
+    older: (user) => {
+      return user.age > 18
+    },
+    address: (user) => {
+      return {
+        street: user.street,
+        number: user.number
+      }
+    }
+  },
+
   Query: {
     getUsers:   () => usersDB,
     usersCount: () => usersDB.length,
-    findUser: (user, args) => {
+    findUser: (root, args) => {
       const { name } = args;
       return usersDB.find((user) => user.name === name);
     }
   },
 
-//  User: {
-/*     address: (user) => {
-      return {
-        street: user.street,
-        number: user.number
-      }
-    }, */
-/*     older: (user) => {
-      return user.age > 18
-    } */
-//  }
-
-
-    Mutation: {
-      createUser: (parent, args) => {
-        const user = { ...args, id: uuid() };
-        usersDB.push(user); // Update database
-        return user;
-      }
+  Mutation: {
+    createUser: (parent, args) => {
+      const user = { ...args, id: uuid() };
+      usersDB.push(user); // Update database
+      return user;
     }
-
+  }
 
 
 };
